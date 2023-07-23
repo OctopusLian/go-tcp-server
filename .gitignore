@@ -26,4 +26,4 @@ go.sum
 .idea/
 .vscode/
 
-data/
+monitor/data

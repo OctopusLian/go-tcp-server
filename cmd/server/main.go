@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go-tcp-server/frame"
+	"go-tcp-server/metrics"
 	"go-tcp-server/packet"
 	"net"
 )
@@ -35,7 +36,12 @@ func handlePacket(framePayload []byte) (ackFramePayload []byte, err error) {
 }
 
 func handleConn(c net.Conn) {
-	defer c.Close()
+	metrics.ClientConnected.Inc() // 连接建立，ClientConnected加1
+	defer func() {
+		metrics.ClientConnected.Dec() // 连接断开，ClientConnected减1
+		defer c.Close()
+	}()
+
 	frameCodec := frame.NewMyFrameCodec()
 
 	for {
@@ -44,6 +50,7 @@ func handleConn(c net.Conn) {
 			fmt.Println("handleConn: frame decode error:", err)
 			return
 		}
+		metrics.ReqRecvTotal.Add(1) // 收到并解码一个消息请求，ReqRecvTotal消息计数器加1
 
 		ackFramePayload, err := handlePacket(framePayload)
 		if err != nil {
@@ -56,6 +63,7 @@ func handleConn(c net.Conn) {
 			fmt.Println("handleConn: frame encode error:", err)
 			return
 		}
+		metrics.RspSendTotal.Add(1) // 返回响应后，RspSendTotal消息计数器减1
 	}
 }
 
