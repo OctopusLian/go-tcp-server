@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"go-tcp-server/frame"
 	"go-tcp-server/metrics"
@@ -45,9 +46,13 @@ func handleConn(c net.Conn) {
 	}()
 
 	frameCodec := frame.NewMyFrameCodec()
+	rbuf := bufio.NewReader(c)
+	wbuf := bufio.NewWriter(c)
+
+	defer wbuf.Flush()
 
 	for {
-		framePayload, err := frameCodec.Decode(c)
+		framePayload, err := frameCodec.Decode(rbuf)
 		if err != nil {
 			fmt.Println("handleConn: frame decode error:", err)
 			return
@@ -60,7 +65,7 @@ func handleConn(c net.Conn) {
 			return
 		}
 
-		err = frameCodec.Encode(c, ackFramePayload)
+		err = frameCodec.Encode(wbuf, ackFramePayload)
 		if err != nil {
 			fmt.Println("handleConn: frame encode error:", err)
 			return
