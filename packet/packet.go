@@ -3,6 +3,7 @@ package packet
 import (
 	"bytes"
 	"fmt"
+	"sync"
 )
 
 // Packet协议定义
@@ -40,6 +41,17 @@ type Packet interface {
 type Submit struct {
 	ID      string
 	Payload []byte
+}
+
+/*
+创建了一个 SubmitPool 变量，它的类型为 sync.Pool，这就是我们的内存对象池，池中的对象都是 Submit。
+这样我们在 packet.Decode 中收到 Submit 类型请求时，也不需要新分配一个 Submit 对象，而是直接从 SubmitPool 代表的 Pool 池中取出一个复用
+*/
+
+var SubmitPool = sync.Pool{
+	New: func() interface{} {
+		return &Submit{}
+	},
 }
 
 func (s *Submit) Decode(pktBody []byte) error {

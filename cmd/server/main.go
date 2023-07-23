@@ -27,6 +27,7 @@ func handlePacket(framePayload []byte) (ackFramePayload []byte, err error) {
 			ID:     submit.ID,
 			Result: 0,
 		}
+		packet.SubmitPool.Put(submit) // 将submit对象归还给Pool池
 		ackFramePayload, err = packet.Encode(submitAck)
 		if err != nil {
 			fmt.Println("handleConn: packet encode error:", err)
