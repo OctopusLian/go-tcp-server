@@ -26,3 +26,8 @@ fcc6a9310736   quay.io/prometheus/node-exporter:latest   "/bin/node_exporter …
 整个观测设施中各个工具之间的关系:  
 ![](./img/观测设施各工具联系.webp)  
 
+
+pprof剖析  
+```
+$ go tool pprof -http=:9090 http://127.0.0.1:6060/debug/pprof/profile
+```

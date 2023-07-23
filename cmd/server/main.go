@@ -6,6 +6,8 @@ import (
 	"go-tcp-server/metrics"
 	"go-tcp-server/packet"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 func handlePacket(framePayload []byte) (ackFramePayload []byte, err error) {
@@ -68,6 +70,10 @@ func handleConn(c net.Conn) {
 }
 
 func main() {
+	go func() {
+		http.ListenAndServe(":6060", nil)
+	}()
+
 	l, err := net.Listen("tcp", ":8888") // 服务端程序监听 8888 端口
 	if err != nil {
 		fmt.Println("listen error:", err)
